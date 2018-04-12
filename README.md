@@ -10,7 +10,7 @@ Options
 Examples:
 Dump out 1 KibiByte of data as hex from RdRand instruction:
 
-> quickrdrand
+\> quickrdrand
 2c38df0ccee99361 cdbce2f0c4d4663c cc9d82ca61beb781 ccbc4914497e78f4
 852f819e693f49c5 65ccfec5db52214b 0bc51e06da93a595 6301e995cd6d51ce
 3c4239cf780e9287 9a4a18c26b756126 5358d0dcea87c3d7 ff04e80190114a98
@@ -45,11 +45,11 @@ f5bf0c33a8f89904 53c8471363d722fb d313267810000d5e f967a1d85023eba4
 fe9c955f1141158f de9a605c086e8ba5 0894ef48d754b67b a1b073945aadec36
 
 Dump out 10 MibiBytes to a binary file
-> quickrdrand -b -k 10240 > binary.bin
+\> quickrdrand -b -k 10240 > binary.bin
 
 Dump out data using RdSeed:
 
-> quickrdrand -s
+\> quickrdrand -s
 78cc98b286b6ec76 77374a0a8b4c4ea3 0394c86d191b3a9f acf038acf581fce5
 01d2dbe496748a49 8db8b3f8a9063fc1 ded96347845b46b0 acc113225424c604
 3e8bff6d3318cf5e 95588dd5600b7a18 e2b930875649c98f c25a9530d7f0ec83
