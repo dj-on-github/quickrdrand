@@ -12,7 +12,7 @@ Examples:
 Dump out 1 KibiByte of data as hex from RdRand instruction:
 
 ```
-\> quickrdrand
+> quickrdrand
 2c38df0ccee99361 cdbce2f0c4d4663c cc9d82ca61beb781 ccbc4914497e78f4
 852f819e693f49c5 65ccfec5db52214b 0bc51e06da93a595 6301e995cd6d51ce
 3c4239cf780e9287 9a4a18c26b756126 5358d0dcea87c3d7 ff04e80190114a98
