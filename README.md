@@ -8,8 +8,10 @@ Options
   -c    : Dump out continuously.
   
 Examples:
+
 Dump out 1 KibiByte of data as hex from RdRand instruction:
 
+```
 \> quickrdrand
 2c38df0ccee99361 cdbce2f0c4d4663c cc9d82ca61beb781 ccbc4914497e78f4
 852f819e693f49c5 65ccfec5db52214b 0bc51e06da93a595 6301e995cd6d51ce
@@ -43,13 +45,18 @@ f5bf0c33a8f89904 53c8471363d722fb d313267810000d5e f967a1d85023eba4
 7fa5aea162c78ce3 c6344652ec21e3b6 15020b2eafe0d9e8 6bb6246c3c6b4e6a
 3a8418b441bbcf1a ac22b6b3e3f094e2 f00f16773a66bad7 a36ac97d6b638aa2
 fe9c955f1141158f de9a605c086e8ba5 0894ef48d754b67b a1b073945aadec36
+```
 
 Dump out 10 MibiBytes to a binary file
-\> quickrdrand -b -k 10240 > binary.bin
+
+```
+> quickrdrand -b -k 10240 > binary.bin
+```
 
 Dump out data using RdSeed:
 
-\> quickrdrand -s
+```
+> quickrdrand -s
 78cc98b286b6ec76 77374a0a8b4c4ea3 0394c86d191b3a9f acf038acf581fce5
 01d2dbe496748a49 8db8b3f8a9063fc1 ded96347845b46b0 acc113225424c604
 3e8bff6d3318cf5e 95588dd5600b7a18 e2b930875649c98f c25a9530d7f0ec83
@@ -82,3 +89,4 @@ b782d94e07b5058d b2a84f3d980db1b6 bf36008ed76497e1 7b20258e96358ee3
 fa37aa66d4a604c2 a3d3f4c7eb3f6bf1 f31d80e233aa1741 e948ba0fac777e54
 f7658bdf7a620f21 c09d8156be5d872a e66fd890cb3e0e67 15887141cf22cdd1
 13e843d4408c2813 081951dd54c122ac c80002ef8df6394c c0c22a5f901ee03c
+```
