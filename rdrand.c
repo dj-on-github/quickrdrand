@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include "aes128k128d.h"
 
 typedef struct {
         unsigned int EAX;
