@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <inttypes.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "rdrand.h"
+#include "rdrand_stdint.h"
 
 #define DEBUG 0
 #define BUFFERSZ 128
@@ -45,11 +46,11 @@ unsigned long long int li[5];
 
 unsigned int i;
 unsigned int j;
-unsigned long long int foo;
+uint64_t foo;
 
 unsigned char seed[16];
-unsigned long long int data[2*BUFFERSZ];
-unsigned long long int megabuff[131072];
+uint64_t data[2*BUFFERSZ];
+uint64_t megabuff[131072];
 unsigned char *bytedata;
 unsigned char *ptr;
 
@@ -181,16 +182,16 @@ for (index = optind; index < argc; index++)
                     if (DEBUG > 1) printf("<p>Getting megabyte #%d</p>\n",i);
                     if (bugfix == 1)
                     {
-                        n = rdrand_get_n_qints_retry(131072,30,megabuff);
+                        n = rdrand_get_n_uint64_retry(131072,30,megabuff);
                         fixbuff(megabuff);
                         n = write(f,megabuff,(512*1024));
-                        n = rdrand_get_n_qints_retry(131072,30,megabuff);
+                        n = rdrand_get_n_uint64_retry(131072,30,megabuff);
                         fixbuff(megabuff);
                         n = write(f,megabuff,(512*1024));
                     }
                     else
                     {   
-                        n = rdrand_get_n_qints_retry(131072,30,megabuff);
+                        n = rdrand_get_n_uint64_retry(131072,30,megabuff);
                         n = write(f,megabuff,(1024*1024));
                     }
                     if (DEBUG > 1) printf("<p>write returned #%d</p>\n",n);
@@ -223,9 +224,9 @@ for (index = optind; index < argc; index++)
                 if (bugfix==1)
                 {
                     if (rdseed == 1)
-                        n = rdseed_get_n_qints_retry(2*BUFFERSZ, 10, data);
+                        n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 10, data);
                     else
-                        n = rdrand_get_n_qints_retry(2*BUFFERSZ, 10, data);
+                        n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 10, data);
                     fixsmallbuff(data);
 
                     if (binary == 1)
@@ -242,9 +243,9 @@ for (index = optind; index < argc; index++)
                 else
                 {
                     if (rdseed == 1)
-                        n = rdseed_get_n_qints_retry(2*BUFFERSZ, 10, data);
+                        n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 10, data);
                     else
-                        n = rdrand_get_n_qints_retry(2*BUFFERSZ, 10, data);
+                        n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 10, data);
                     //n = rdrand_get_n_qints_retry(BUFFERSZ, 10, data);
                     if (binary == 1)
                     {
@@ -266,9 +267,9 @@ for (index = optind; index < argc; index++)
                 if (bugfix == 1)
                 {
                     if (rdseed == 1)
-                        n = rdseed_get_n_qints_retry(2*BUFFERSZ, 1000, data);
+                        n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
                     else
-                        n = rdrand_get_n_qints_retry(2*BUFFERSZ, 1000, data);
+                        n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
                     //n = rdrand_get_n_qints_retry(2*BUFFERSZ, 1000, data);
                     fixsmallbuff(data);
                     if (binary == 1)
@@ -281,17 +282,17 @@ for (index = optind; index < argc; index++)
                         for (i=0;i<(BUFFERSZ);)
                         {
                         /* printf("i=%d\n",i);*/
-                            printf("%016Lx %016Lx %016Lx %016Lx\n",data[i++], data[i++], data[i++], data[i++]);
-                            /* usleep(delay*1000); */
+                            printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
+                        /* usleep(delay*1000); */
                         }
                     }
                 }
                 else
                 {
                     if (rdseed == 1)
-                        n = rdseed_get_n_qints_retry(2*BUFFERSZ, 1000, data);
+                        n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
                     else
-                        n = rdrand_get_n_qints_retry(2*BUFFERSZ, 1000, data);
+                        n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
                     //n = rdrand_get_n_qints_retry(BUFFERSZ, 100000, data);
                     if (binary == 1)
                     {
@@ -300,7 +301,7 @@ for (index = optind; index < argc; index++)
                     else    
                     for (i=0;i<(BUFFERSZ);)
                     {
-                        printf("%016Lx %016Lx %016Lx %016Lx\n",data[i++], data[i++], data[i++], data[i++]);
+                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
                         usleep(delay*1000);
                     }
                 }

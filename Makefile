@@ -1,5 +1,5 @@
-QKOBJS = rdrand.o quickrdrand.o #aes128k128d.o
-WROBJS = rdrand.o webrandmeg.o #aes128k128d.o
+QKOBJS = rdrand_stdint.o quickrdrand.o
+WROBJS = rdrand_stdint.o webrandmeg.o
 EXECS =  quickrdrand webrandmeg
 CC = gcc
 CFLAGS = -static
@@ -27,9 +27,8 @@ webrandmeg.o: webrandmeg.c
 quickrdrand.o: quickrdrand.c 
 	$(CC) $(CFLAGS) -c quickrdrand.c -o quickrdrand.o
 
-rdrand.o: rdrand.c
-	$(CC) $(CFLAGS) -c rdrand.c -o rdrand.o
+rdrand_stdint.o: rdrand_stdint.c rdrand_stdint.h
+	$(CC) $(CFLAGS) -c rdrand_stdint.c -o rdrand_stdint.o
 
-#aes128k128d.o: aes128k128d.c aes128k128d.h 
-#	$(CC) $(CFLAGS) -c aes128k128d.c -o aes128k128d.o
+
 

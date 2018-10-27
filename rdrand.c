@@ -47,7 +47,7 @@ asm("\n\
     mov %%eax,%0\n\
     mov %%ebx,%1\n\
     mov %%ecx,%2\n\
-    mov %%edx,%3":"=r"(a),"=r"(b),"=r"(c),"=r"(d):"r"(leaf):"%eax","%ebx","%ecx","%edx");
+    mov %%edx,%3":"=g"(a),"=g"(b),"=g"(c),"=g"(d):"g"(leaf):"%eax","%ebx","%ecx","%edx");
     info->EAX = a;
     info->EBX = b;
     info->ECX = c;
@@ -78,30 +78,30 @@ asm("\n\
 /*asm(".att_syntax prefix\n");*/
 /*}*/
 
-/* Trying GAS format to make clang happy*/
-void get_cpuid_linux(CPUIDinfo *info, const unsigned int func, const unsigned int subfunc)
-{
-asm(".intel_syntax noprefix;\n\
-mov r8, rdi;\n\
-mov r9, rsi;\n\
-mov r10, rdx;\n\
-push rax;\n\
-push rbx;\n\
-push rcx;\n\
-push rdx;\n\
-mov eax, r9d;\n\
-mov ecx, r10d;\n\
-cpuid;\n\
-mov DWORD PTR [r8], eax;\n\
-mov DWORD PTR [r8+4], ebx;\n\
-mov DWORD PTR [r8+8], ecx;\n\
-mov DWORD PTR [r8+12], edx;\n\
-pop rdx;\n\
-pop rcx;\n\
-pop rbx;\n\
-pop rax;\n\
-.att_syntax prefix\n");
-}
+///* Trying GAS format to make clang happy*/
+//void get_cpuid_linux(CPUIDinfo *info, const unsigned int func, const unsigned int subfunc)
+//{
+//asm(".intel_syntax noprefix;\n\
+//mov r8, rdi;\n\
+//mov r9, rsi;\n\
+//mov r10, rdx;\n\
+//push rax;\n\
+//push rbx;\n\
+//push rcx;\n\
+//push rdx;\n\
+//mov eax, r9d;\n\
+//mov ecx, r10d;\n\
+//cpuid;\n\
+//mov DWORD PTR [r8], eax;\n\
+//mov DWORD PTR [r8+4], ebx;\n\
+//mov DWORD PTR [r8+8], ecx;\n\
+//mov DWORD PTR [r8+12], edx;\n\
+//pop rdx;\n\
+//pop rcx;\n\
+//pop rbx;\n\
+//pop rax;\n\
+//.att_syntax prefix\n");
+//}
 
 
 void get_cpuid(CPUIDinfo *info, const unsigned int func, const unsigned int subfunc) {
@@ -656,6 +656,7 @@ unsigned int length;
 	/* Compute the address of the first 64 bit aligned block in the destination buffer */
 	start = dest;
 	if (((unsigned long long int)start % (unsigned long long int)8) == 0)
+    //if (((unsigned int)start & 7) == 0)
 	{
 		blockstart = (unsigned long long int *)start;
 		count = n;

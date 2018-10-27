@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "rdrand.h"
+#include "rdrand_stdint.h"
 
 #define DEBUG 0
 #define BUFFERSZ 128
@@ -121,7 +121,7 @@ for (index = optind; index < argc; index++)
     fflush(stdout);
 
     if (rdrand_check_support()==1) {
-        n = rdrand_get_n_qints_retry(65536,30,megabuff);
+        n = rdrand_get_n_uint64_retry(65536,30,megabuff);
         fwrite(megabuff,8,65536,stdout);
         fwrite(megabuff2,8,65536,stdout);
         fflush(stdout);
