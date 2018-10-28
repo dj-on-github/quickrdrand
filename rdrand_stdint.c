@@ -19,6 +19,7 @@ uint32_t c;
 uint32_t d;
 
 asm("\n\
+    xor %%ecx, %%ecx\n\
     mov %4, %%eax\n\
     cpuid\n\
     mov %%eax,%0\n\
@@ -121,7 +122,6 @@ int check_rdrand() {
     CPUIDinfo info;
    
     get_cpuid(&info,1,0);
-   
     if ((info.ECX & 0x40000000)==0x40000000) return 1;
     return 0;
 }

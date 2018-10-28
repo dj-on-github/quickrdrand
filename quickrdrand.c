@@ -236,7 +236,7 @@ for (index = optind; index < argc; index++)
                     else    
                     for (i=0;i<(BUFFERSZ);)
                     {
-                        printf("%016Lx %016Lx %016Lx %016Lx\n",data[i++], data[i++], data[i++], data[i++]);
+                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
                         usleep(delay*1000);
                     }
                 }
@@ -254,7 +254,7 @@ for (index = optind; index < argc; index++)
                     else    
                     for (i=0;i<(BUFFERSZ);)
                     {
-                        printf("%016Lx %016Lx %016Lx %016Lx\n",data[i++], data[i++], data[i++], data[i++]);
+                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
                         usleep(delay*1000);
                     }
                 }
