@@ -411,6 +411,32 @@ uint64_t therand;
   }
 }
 
+
+/****************************************************************/
+/* Uses RdRand to acquire a block of n 32 bit random numbers    */
+/*   Writes that entropy to (unsigned long long int *)dest[0+]. */
+/*   Will retry up to retry_limit times                         */
+/*   Returns 1 on success, or 0 on underflow                    */
+/****************************************************************/
+
+int rdrand_get_n_uint32_retry(uint32_t n, uint32_t retry_limit, uint32_t *dest)
+{
+int success=0;
+int count=0;
+int i=0;
+
+	for (i=0; i<n; i++)
+	{
+		count = 0;
+		do
+		{
+        		success=rdrand32_step(dest);
+		} while((success == 0) && (count++ < retry_limit));
+		if (success == 0) return 0;
+		dest=&(dest[1]);
+	}
+	return 1; 
+}
 /****************************************************************/
 /* Uses RdRand to acquire a block of n 64 bit random numbers    */
 /*   Writes that entropy to (unsigned long long int *)dest[0+]. */

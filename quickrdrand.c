@@ -12,7 +12,7 @@
 #define BUFFERSZ 128
 #define MAX_MEGABYTES 10000
 
-void fixsmallbuff(unsigned long long int *buff)
+void fixsmallbuff(uint64_t *buff)
 {
     unsigned char *cbuff;
     int i;
@@ -24,7 +24,7 @@ void fixsmallbuff(unsigned long long int *buff)
     }
 }
 
-void fixbuff(unsigned long long int *buff)
+void fixbuff(uint64_t *buff)
 {
     unsigned char *cbuff;
     int i;
@@ -42,7 +42,7 @@ int n;
 int ni[5];
 unsigned short int ji[5];
 unsigned int ki[5];
-unsigned long long int li[5];
+uint64_t li[5];
 
 unsigned int i;
 unsigned int j;
@@ -93,8 +93,22 @@ char *kvalue = NULL;
 int c;
 int index;
 int rdseed = 0;
+int thirtytwobit = 0;
 
-while ((c = getopt (argc, argv, "bsck:")) != -1)
+
+int pull64(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t *megabuff) {
+    
+    int n;
+    if (thirtytwobit == 0) {
+        n = rdrand_get_n_uint64_retry(amount,retries,megabuff); 
+        return n;   
+    } else {
+        n = rdrand_get_n_uint32_retry(amount*2,retries,(uint32_t *)megabuff); 
+        return n;
+    }
+};
+
+while ((c = getopt (argc, argv, "bsctk:")) != -1)
     switch (c)
     {
         case 'c':
@@ -109,6 +123,9 @@ while ((c = getopt (argc, argv, "bsck:")) != -1)
         case 'k':
             kvalue = optarg;
             kilobytes = atoi(kvalue);
+            break;
+        case 't':
+            thirtytwobit = 1;
             break;
         default:
 	    exit(1);
@@ -182,16 +199,19 @@ for (index = optind; index < argc; index++)
                     if (DEBUG > 1) printf("<p>Getting megabyte #%d</p>\n",i);
                     if (bugfix == 1)
                     {
-                        n = rdrand_get_n_uint64_retry(131072,30,megabuff);
+                        //n = rdrand_get_n_uint64_retry(131072,30,megabuff);
+                        n = pull64(thirtytwobit, 131072,30,megabuff);
                         fixbuff(megabuff);
                         n = write(f,megabuff,(512*1024));
-                        n = rdrand_get_n_uint64_retry(131072,30,megabuff);
+                        //n = rdrand_get_n_uint64_retry(131072,30,megabuff);
+                        n = pull64(thirtytwobit, 131072,30,megabuff);
                         fixbuff(megabuff);
                         n = write(f,megabuff,(512*1024));
                     }
                     else
                     {   
-                        n = rdrand_get_n_uint64_retry(131072,30,megabuff);
+                        //n = rdrand_get_n_uint64_retry(131072,30,megabuff);
+                        n = pull64(thirtytwobit, 131072,30,megabuff);
                         n = write(f,megabuff,(1024*1024));
                     }
                     if (DEBUG > 1) printf("<p>write returned #%d</p>\n",n);
@@ -224,9 +244,9 @@ for (index = optind; index < argc; index++)
                 if (bugfix==1)
                 {
                     if (rdseed == 1)
-                        n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 10, data);
+                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,megabuff);
                     else
-                        n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 10, data);
+                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
                     fixsmallbuff(data);
 
                     if (binary == 1)
@@ -243,9 +263,9 @@ for (index = optind; index < argc; index++)
                 else
                 {
                     if (rdseed == 1)
-                        n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 10, data);
+                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
                     else
-                        n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 10, data);
+                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
                     //n = rdrand_get_n_qints_retry(BUFFERSZ, 10, data);
                     if (binary == 1)
                     {
@@ -267,9 +287,11 @@ for (index = optind; index < argc; index++)
                 if (bugfix == 1)
                 {
                     if (rdseed == 1)
-                        n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
+                        //n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
+                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
                     else
-                        n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
+                        //n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
+                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
                     //n = rdrand_get_n_qints_retry(2*BUFFERSZ, 1000, data);
                     fixsmallbuff(data);
                     if (binary == 1)
@@ -290,9 +312,11 @@ for (index = optind; index < argc; index++)
                 else
                 {
                     if (rdseed == 1)
-                        n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
+                        //n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
+                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
                     else
-                        n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
+                        //n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
+                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
                     //n = rdrand_get_n_qints_retry(BUFFERSZ, 100000, data);
                     if (binary == 1)
                     {
