@@ -96,7 +96,7 @@ int rdseed = 0;
 int thirtytwobit = 0;
 
 
-int pull64(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t *megabuff) {
+int pull64_rdrand(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t *megabuff) {
     
     int n;
     if (thirtytwobit == 0) {
@@ -107,6 +107,19 @@ int pull64(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t *megabu
         return n;
     }
 };
+
+int pull64_rdseed(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t *megabuff) {
+    
+    int n;
+    if (thirtytwobit == 0) {
+        n = rdseed_get_n_uint64_retry(amount,retries,megabuff); 
+        return n;   
+    } else {
+        n = rdseed_get_n_uint32_retry(amount*2,retries,(uint32_t *)megabuff); 
+        return n;
+    }
+};
+
 
 while ((c = getopt (argc, argv, "bsctk:")) != -1)
     switch (c)
@@ -200,18 +213,18 @@ for (index = optind; index < argc; index++)
                     if (bugfix == 1)
                     {
                         //n = rdrand_get_n_uint64_retry(131072,30,megabuff);
-                        n = pull64(thirtytwobit, 131072,30,megabuff);
+                        n = pull64_rdrand(thirtytwobit, 131072,30,megabuff);
                         fixbuff(megabuff);
                         n = write(f,megabuff,(512*1024));
                         //n = rdrand_get_n_uint64_retry(131072,30,megabuff);
-                        n = pull64(thirtytwobit, 131072,30,megabuff);
+                        n = pull64_rdrand(thirtytwobit, 131072,30,megabuff);
                         fixbuff(megabuff);
                         n = write(f,megabuff,(512*1024));
                     }
                     else
                     {   
                         //n = rdrand_get_n_uint64_retry(131072,30,megabuff);
-                        n = pull64(thirtytwobit, 131072,30,megabuff);
+                        n = pull64_rdrand(thirtytwobit, 131072,30,megabuff);
                         n = write(f,megabuff,(1024*1024));
                     }
                     if (DEBUG > 1) printf("<p>write returned #%d</p>\n",n);
@@ -244,9 +257,9 @@ for (index = optind; index < argc; index++)
                 if (bugfix==1)
                 {
                     if (rdseed == 1)
-                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,megabuff);
+                        n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,megabuff);
                     else
-                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
+                        n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
                     fixsmallbuff(data);
 
                     if (binary == 1)
@@ -263,9 +276,9 @@ for (index = optind; index < argc; index++)
                 else
                 {
                     if (rdseed == 1)
-                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
+                        n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,data);
                     else
-                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
+                        n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
                     //n = rdrand_get_n_qints_retry(BUFFERSZ, 10, data);
                     if (binary == 1)
                     {
@@ -288,10 +301,10 @@ for (index = optind; index < argc; index++)
                 {
                     if (rdseed == 1)
                         //n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
-                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
+                        n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,data);
                     else
                         //n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
-                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
+                        n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
                     //n = rdrand_get_n_qints_retry(2*BUFFERSZ, 1000, data);
                     fixsmallbuff(data);
                     if (binary == 1)
@@ -313,10 +326,10 @@ for (index = optind; index < argc; index++)
                 {
                     if (rdseed == 1)
                         //n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
-                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
+                        n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,data);
                     else
                         //n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
-                        n = pull64(thirtytwobit, 2*BUFFERSZ,10,data);
+                        n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
                     //n = rdrand_get_n_qints_retry(BUFFERSZ, 100000, data);
                     if (binary == 1)
                     {

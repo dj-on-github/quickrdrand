@@ -437,6 +437,25 @@ int i=0;
 	}
 	return 1; 
 }
+
+int rdseed_get_n_uint32_retry(uint32_t n, uint32_t retry_limit, uint32_t *dest)
+{
+int success=0;
+int count=0;
+int i=0;
+
+	for (i=0; i<n; i++)
+	{
+		count = 0;
+		do
+		{
+        		success=rdseed32_step(dest);
+		} while((success == 0) && (count++ < retry_limit));
+		if (success == 0) return 0;
+		dest=&(dest[1]);
+	}
+	return 1; 
+}
 /****************************************************************/
 /* Uses RdRand to acquire a block of n 64 bit random numbers    */
 /*   Writes that entropy to (unsigned long long int *)dest[0+]. */

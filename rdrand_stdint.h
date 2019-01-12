@@ -18,5 +18,7 @@ extern int rdrand_check_support();
 extern int rdseed_check_support();
 
 extern int rdrand_get_n_uint32_retry(uint32_t n, uint32_t retry_limit, uint32_t *dest);
+extern int rdseed_get_n_uint32_retry(uint32_t n, uint32_t retry_limit, uint32_t *dest);
 extern int rdrand_get_n_uint64_retry(uint32_t n, uint32_t retry_limit, uint64_t *dest);
 extern int rdseed_get_n_uint64_retry(uint32_t n, uint32_t retry_limit, uint64_t *dest);
+
