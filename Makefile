@@ -2,7 +2,7 @@ QKOBJS = rdrand_stdint.o quickrdrand.o
 WROBJS = rdrand_stdint.o webrandmeg.o
 EXECS =  quickrdrand webrandmeg
 CC = gcc
-CFLAGS = -static
+CFLAGS = -static -mrdrnd -mrdseed
 
 all: $(EXECS)
 

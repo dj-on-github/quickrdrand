@@ -48,9 +48,9 @@ unsigned int j;
 unsigned long long int foo;
 
 unsigned char seed[16];
-unsigned long long int data[2*BUFFERSZ];
-unsigned long long int megabuff[65536];
-unsigned long long int megabuff2[65536];
+uint64_t data[2*BUFFERSZ];
+uint64_t megabuff[65536];
+uint64_t megabuff2[65536];
 unsigned char *bytedata;
 unsigned char *ptr;
 
