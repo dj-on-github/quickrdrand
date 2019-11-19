@@ -36,6 +36,30 @@ void fixbuff(uint64_t *buff)
     }
 }
 
+int pull64_rdrand(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t *megabuff) {
+    
+    int n;
+    if (thirtytwobit == 0) {
+        n = rdrand_get_n_uint64_retry(amount,retries,megabuff); 
+        return n;   
+    } else {
+        n = rdrand_get_n_uint32_retry(amount*2,retries,(uint32_t *)megabuff); 
+        return n;
+    }
+};
+
+int pull64_rdseed(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t *megabuff) {
+    
+    int n;
+    if (thirtytwobit == 0) {
+        n = rdseed_get_n_uint64_retry(amount,retries,megabuff); 
+        return n;   
+    } else {
+        n = rdseed_get_n_uint32_retry(amount*2,retries,(uint32_t *)megabuff); 
+        return n;
+    }
+};
+
 int main(int argc, char** argv, char** environ)
 {
 int n;
@@ -97,31 +121,6 @@ int index;
 int rdseed = 0;
 int thirtytwobit = 0;
 int memory_resident = 0;
-
-
-int pull64_rdrand(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t *megabuff) {
-    
-    int n;
-    if (thirtytwobit == 0) {
-        n = rdrand_get_n_uint64_retry(amount,retries,megabuff); 
-        return n;   
-    } else {
-        n = rdrand_get_n_uint32_retry(amount*2,retries,(uint32_t *)megabuff); 
-        return n;
-    }
-};
-
-int pull64_rdseed(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t *megabuff) {
-    
-    int n;
-    if (thirtytwobit == 0) {
-        n = rdseed_get_n_uint64_retry(amount,retries,megabuff); 
-        return n;   
-    } else {
-        n = rdseed_get_n_uint32_retry(amount*2,retries,(uint32_t *)megabuff); 
-        return n;
-    }
-};
 
 
 while ((c = getopt (argc, argv, "bsctmk:")) != -1)
