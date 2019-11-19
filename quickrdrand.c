@@ -48,6 +48,8 @@ unsigned int i;
 unsigned int j;
 uint64_t foo;
 
+unsigned char *bigbuff;
+uint64_t      *bigbuff64;
 unsigned char seed[16];
 uint64_t data[2*BUFFERSZ];
 uint64_t megabuff[131072];
@@ -94,6 +96,7 @@ int c;
 int index;
 int rdseed = 0;
 int thirtytwobit = 0;
+int memory_resident = 0;
 
 
 int pull64_rdrand(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t *megabuff) {
@@ -121,7 +124,7 @@ int pull64_rdseed(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t 
 };
 
 
-while ((c = getopt (argc, argv, "bsctk:")) != -1)
+while ((c = getopt (argc, argv, "bsctmk:")) != -1)
     switch (c)
     {
         case 'c':
@@ -139,6 +142,9 @@ while ((c = getopt (argc, argv, "bsctk:")) != -1)
             break;
         case 't':
             thirtytwobit = 1;
+            break;
+        case 'm':
+            memory_resident = 1;
             break;
         default:
 	    exit(1);
@@ -322,7 +328,7 @@ for (index = optind; index < argc; index++)
                         }
                     }
                 }
-                else
+                else if (memory_resident==0)
                 {
                     if (rdseed == 1)
                         //n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
@@ -341,6 +347,42 @@ for (index = optind; index < argc; index++)
                         printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
                         usleep(delay*1000);
                     }
+                }
+                else // memory resident version
+                {
+                    //printf("A\n"); fflush(stdout);
+
+                    bigbuff = (unsigned char *)malloc((kilobytes*1024)+1);
+                    if (bigbuff==NULL){
+                        printf("Could not allocate %d bytes in memory\n",(kilobytes*1024));
+                        exit(1);
+                    }
+                    bigbuff64=(uint64_t *)bigbuff;
+
+                    //printf("B\n"); fflush(stdout);
+                    if (rdseed == 1)
+                        n = pull64_rdseed(thirtytwobit, (kilobytes*128),10000,bigbuff64);
+                    else
+                        n = pull64_rdrand(thirtytwobit, (kilobytes*128),10,bigbuff64);
+                    //n = rdrand_get_n_qints_retry(BUFFERSZ, 100000, data);
+                    j = j+kilobytes;
+                    //printf("C\n"); fflush(stdout);
+                    if (binary == 1)
+                    {
+                        fwrite(bigbuff, 1, (kilobytes*1024), stdout);
+                    }
+                    else  {  
+                        for (i=0;i<((kilobytes*1024)/8);)
+                        {
+                            printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",bigbuff64[i], bigbuff64[i+1], bigbuff64[i+2], bigbuff64[i+3]);
+                            i+=4;
+                            usleep(delay*1000);
+                        }
+                    }
+                    //printf("D\n"); fflush(stdout);
+                    
+                    free(bigbuff);
+                    
                 }
             }
         }
