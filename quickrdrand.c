@@ -62,8 +62,8 @@ int pull64_rdseed(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t 
 
 int main(int argc, char** argv, char** environ)
 {
-int n;
-int ni[5];
+uint32_t n;
+uint32_t ni[5];
 unsigned short int ji[5];
 unsigned int ki[5];
 uint64_t li[5];
@@ -104,11 +104,11 @@ unsigned char *cgifile;
 unsigned char *cgimegabytes;
 int megabytes;
 int f;
-unsigned char filename[255];
-unsigned char shortfilename[255];
+char filename[255];
+char shortfilename[255];
 int content_length;
-unsigned char *content_length_ptr;
-unsigned char post_buffer[10000];
+char *content_length_ptr;
+char post_buffer[10000];
 int docgi;
 mode_t oldmask;
 
@@ -167,7 +167,7 @@ for (index = optind; index < argc; index++)
         if (DEBUG > 1) printf("argv[0]:%s\n",argv[0]);
 
         i = 0;
-        ptr = environ[i];
+        ptr = (unsigned char *)environ[i];
         while (ptr != NULL)
         {
             if (DEBUG > 1) printf("%s\n",environ[i]);
@@ -178,7 +178,7 @@ for (index = optind; index < argc; index++)
                 if (DEBUG > 1) printf("FOUND CONTENT_LENGTH = %d\n",content_length);
             }
             i++;
-            ptr = environ[i];
+            ptr = (unsigned char *)environ[i];
         }
 
         binary = 1;
@@ -197,16 +197,16 @@ for (index = optind; index < argc; index++)
     if ( ((rdrand_check_support()==1) && (rdseed==0)) || ((rdseed_check_support()==1) && (rdseed==1))) {
         i = 0;
         j = 0;
-        if ((docgi == 1))
+        if (docgi == 1)
         {
             if (megabytes == 0) megabytes = 1;
 
             if (DEBUG > 1) printf("<p>megabytes %d</p>",megabytes);
             if (megabytes > MAX_MEGABYTES) megabytes = MAX_MEGABYTES;
             rdrand32_step(&n);
-            sprintf(filename,"/var/www/html/webrandfiles/rand_%d.bin",(unsigned int)abs(n));
-            //sprintf(shortfilename,"http://134.134.159.83/randfiles/rand_%d.bin",(unsigned int)abs(n));
-            sprintf(shortfilename,"http://davidsdesktop.com/webrandfiles/rand_%d.bin",(unsigned int)abs(n));
+            sprintf(filename,"/var/www/html/webrandfiles/rand_%d.bin",(unsigned int)n);
+            //sprintf(shortfilename,"http://134.134.159.83/randfiles/rand_%d.bin",n);
+            sprintf(shortfilename,"http://davidsdesktop.com/webrandfiles/rand_%d.bin",(unsigned int)n);
             //f = open(filename, (O_WRONLY | O_CREAT | S_IROTH | S_IWOTH | S_IRUSR | S_IWUSR ));
             f = open(filename, (O_WRONLY | O_CREAT ));
             if (DEBUG > 1) printf("<p>open %s for writing = %d</p>\n",filename, f);
@@ -274,7 +274,8 @@ for (index = optind; index < argc; index++)
                     else    
                     for (i=0;i<(BUFFERSZ);)
                     {
-                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
+                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
+                        i+=4;
                         usleep(delay*1000);
                     }
                 }
@@ -292,7 +293,8 @@ for (index = optind; index < argc; index++)
                     else    
                     for (i=0;i<(BUFFERSZ);)
                     {
-                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
+                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
+                        i+=4;
                         usleep(delay*1000);
                     }
                 }
@@ -322,7 +324,8 @@ for (index = optind; index < argc; index++)
                         for (i=0;i<(BUFFERSZ);)
                         {
                         /* printf("i=%d\n",i);*/
-                            printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
+                            printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
+                            i += 4;
                         /* usleep(delay*1000); */
                         }
                     }
@@ -343,7 +346,8 @@ for (index = optind; index < argc; index++)
                     else    
                     for (i=0;i<(BUFFERSZ);)
                     {
-                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
+                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
+                        i += 4;
                         usleep(delay*1000);
                     }
                 }
