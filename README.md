@@ -8,6 +8,12 @@ Options
   -k n  : Dump <n> KibiBytes of data
   
   -b    : Dump out in binary (default is hex)
+
+  -g n  : Group size. Data is output in time order. 
+          Lower order bits are considered first.
+          When in hex output mode (the default) this 
+          chooses what size groups to split the 64 bit rdrand number into.
+          Can be one of 8,16,32 or 64 (the default).
   
   -c    : Dump out continuously.
   

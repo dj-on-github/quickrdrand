@@ -60,6 +60,43 @@ int pull64_rdseed(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t 
     }
 };
 
+void printhex(int groupsize, uint64_t *data, unsigned int i)
+{
+    uint32_t *dwordp;
+    uint16_t *wordp;
+    uint8_t  *chp;
+    int j;
+    if (groupsize == 64)
+    {
+        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
+               data[i],        data[i+1],     data[i+2],     data[i+3]);
+    }
+    else if (groupsize == 32)
+    {
+        dwordp=(uint32_t *)(&(data[i]));
+        for (j=0;j<7;j++) {
+            printf("%08" PRIx32 " ",dwordp[j]);
+        }
+        printf("%08" PRIx32 "\n",dwordp[7]); 
+    }
+    else if (groupsize == 16)
+    {
+        wordp=(uint16_t *)(&(data[i]));
+        for (j=0;j<15;j++) {
+            printf("%04" PRIx16 " ",wordp[j]);
+        }
+        printf("%04" PRIx16 "\n",wordp[15]); 
+    }
+    else if (groupsize == 8)
+    {
+        chp=(uint8_t *)(&(data[i]));
+        for (j=0;j<31;j++) {
+            printf("%02" PRIx8 " ",chp[j]);
+        }
+        printf("%02" PRIx8 "\n",chp[31]); 
+    }
+}
+
 int main(int argc, char** argv, char** environ)
 {
 uint32_t n;
@@ -119,11 +156,12 @@ char *kvalue = NULL;
 int c;
 int index;
 int rdseed = 0;
+int groupsize = 64;
 int thirtytwobit = 0;
 int memory_resident = 0;
 
 
-while ((c = getopt (argc, argv, "bsctmk:")) != -1)
+while ((c = getopt (argc, argv, "bsctmg:k:")) != -1)
     switch (c)
     {
         case 'c':
@@ -138,6 +176,10 @@ while ((c = getopt (argc, argv, "bsctmk:")) != -1)
         case 'k':
             kvalue = optarg;
             kilobytes = atoi(kvalue);
+            break;
+        case 'g':
+            kvalue = optarg;
+            groupsize = atoi(kvalue);
             break;
         case 't':
             thirtytwobit = 1;
@@ -155,8 +197,22 @@ for (index = optind; index < argc; index++)
     printf ("Non-option argument %s\n", argv[index]);
 
 
-        if (bflag == 1) binary = 1;
-
+    if (bflag == 1) binary = 1;
+    if ((groupsize != 1) && (binary==1)) {
+        fprintf(stderr,"Error groupsize makes no sense unless in hex output mode\n");
+        exit(0);
+    }
+    
+    if (groupsize != 1) {
+        if ( !  ((groupsize == 8)
+                ||(groupsize == 16)
+                ||(groupsize == 32)
+                ||(groupsize == 64))) {
+                fprintf(stderr,"Error, groupsize (-g <n>) must be one of 8,16,32 or 64 bits");
+                exit(0);
+            }
+    }
+    
     docgi = 0;
     if (strstr(argv[0],"quickrdrand.cgi")!=NULL) docgi = 1;
 
@@ -274,7 +330,8 @@ for (index = optind; index < argc; index++)
                     else    
                     for (i=0;i<(BUFFERSZ);)
                     {
-                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
+                        printhex(groupsize,data,i);
+                        //printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
                         i+=4;
                         usleep(delay*1000);
                     }
@@ -293,7 +350,8 @@ for (index = optind; index < argc; index++)
                     else    
                     for (i=0;i<(BUFFERSZ);)
                     {
-                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
+                        printhex(groupsize,data,i);
+                        //printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
                         i+=4;
                         usleep(delay*1000);
                     }
@@ -307,12 +365,9 @@ for (index = optind; index < argc; index++)
                 if (bugfix == 1)
                 {
                     if (rdseed == 1)
-                        //n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
                         n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,data);
                     else
-                        //n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
                         n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
-                    //n = rdrand_get_n_qints_retry(2*BUFFERSZ, 1000, data);
                     fixsmallbuff(data);
                     if (binary == 1)
                     {
@@ -320,11 +375,10 @@ for (index = optind; index < argc; index++)
                     }
                     else    
                     {
-                        /* printf("Collected %d qints\n",2*BUFFERSZ); */
                         for (i=0;i<(BUFFERSZ);)
                         {
-                        /* printf("i=%d\n",i);*/
-                            printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
+                            printhex(groupsize,data,i);
+                            //printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
                             i += 4;
                         /* usleep(delay*1000); */
                         }
@@ -346,7 +400,8 @@ for (index = optind; index < argc; index++)
                     else    
                     for (i=0;i<(BUFFERSZ);)
                     {
-                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
+                        printhex(groupsize,data,i);
+                        //printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i], data[i+1], data[i+2], data[i+3]);
                         i += 4;
                         usleep(delay*1000);
                     }
@@ -377,7 +432,8 @@ for (index = optind; index < argc; index++)
                     else  {  
                         for (i=0;i<((kilobytes*1024)/8);)
                         {
-                            printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",bigbuff64[i], bigbuff64[i+1], bigbuff64[i+2], bigbuff64[i+3]);
+                            printhex(groupsize,data,i);
+                            //printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",bigbuff64[i], bigbuff64[i+1], bigbuff64[i+2], bigbuff64[i+3]);
                             i+=4;
                             usleep(delay*1000);
                         }
