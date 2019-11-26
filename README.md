@@ -11,6 +11,10 @@ Options
   
   -c    : Dump out continuously.
   
+  -m    : Memory Resident. Malloc space to hold all the data before collecting.
+          Ensures no disc access interupts the flow of data during collection.
+          Limited by the amount of memory you can allocate.
+  
 Examples:
 
 Dump out 1 KibiByte of data as hex from RdRand instruction:
