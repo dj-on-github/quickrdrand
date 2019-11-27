@@ -97,6 +97,27 @@ void printhex(int groupsize, uint64_t *data, unsigned int i)
     }
 }
 
+void print_usage()
+{
+    fprintf(stderr,"Usage: quickrdand [-b][-s][-c][-h][-t][-m][-g <8|16|32|63>][-k n]\n\n");
+    fprintf(stderr,"Output random numbers using the RdRand or RdSeed instructions\n");
+    fprintf(stderr,"  Author: David Johnston, dj@deadhat.com\n\n");
+    fprintf(stderr,"  -b   : Dump out in binary (default is hex)\n");
+    fprintf(stderr,"  -s   : Use RdSeed instead of RdRand\n");
+    fprintf(stderr,"  -k n : Dump KibiBytes of data\n");
+    fprintf(stderr,"  -b   : Dump out in binary (default is hex)\n");
+    fprintf(stderr,"  -g n : Group size. Data is output in time order. Lower order\n"); 
+    fprintf(stderr,"         bits are considered first.\n");
+    fprintf(stderr,"         When in hex output mode (the default) this chooses what\n");
+    fprintf(stderr,"         size groups to split the 64 bit rdrand number into.\n");
+    fprintf(stderr,"         Can be one of 8,16,32 or 64 (the default).\n");
+    fprintf(stderr,"  -c   : Dump out continuously.\n");
+    fprintf(stderr,"  -m   : Memory Resident. Malloc space to hold all the data before\n");
+    fprintf(stderr,"         collecting. Ensures no disc access interupts the flow of\n");
+    fprintf(stderr,"         data during collection. Limited by the amount of memory you\n");
+    fprintf(stderr,"         can allocate. \n");
+}
+
 int main(int argc, char** argv, char** environ)
 {
 uint32_t n;
@@ -161,7 +182,7 @@ int thirtytwobit = 0;
 int memory_resident = 0;
 
 
-while ((c = getopt (argc, argv, "bsctmg:k:")) != -1)
+while ((c = getopt (argc, argv, "bschtmg:k:")) != -1)
     switch (c)
     {
         case 'c':
@@ -187,8 +208,10 @@ while ((c = getopt (argc, argv, "bsctmg:k:")) != -1)
         case 'm':
             memory_resident = 1;
             break;
+        case 'h':
         default:
-	    exit(1);
+            print_usage();
+            exit(1);
     }
     
 //printf ("bflag = %d, kvalue = %s, kilobytes=%d\n",bflag, kvalue, kilobytes);

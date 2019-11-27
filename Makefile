@@ -2,7 +2,7 @@ QKOBJS = rdrand_stdint.o quickrdrand.o
 WROBJS = rdrand_stdint.o webrandmeg.o
 EXECS =  quickrdrand webrandmeg
 CC = gcc
-CFLAGS = -static -mrdrnd -mrdseed
+CFLAGS = -mrdrnd -mrdseed
 
 all: $(EXECS)
 
@@ -16,10 +16,10 @@ install: quickrdrand
 	cp  $(EXECS) /usr/local/bin
 
 webrandmeg: $(WROBJS) 
-	gcc -O2 -s $(WROBJS) -lm -o webrandmeg
+	gcc -O2 $(CFLAGS) $(WROBJS) -lm -o webrandmeg
 
 quickrdrand: $(QKOBJS) 
-	gcc -O2 -s $(QKOBJS) -lm -o quickrdrand
+	gcc -O2  $(CFLAGS) $(QKOBJS) -lm -o quickrdrand
 
 webrandmeg.o: webrandmeg.c 
 	$(CC) $(CFLAGS) -c webrandmeg.c -o webrandmeg.o
