@@ -121,9 +121,9 @@ int index;
 int rdseed = 0;
 int thirtytwobit = 0;
 int memory_resident = 0;
+int stutter=0;
 
-
-while ((c = getopt (argc, argv, "bsctmk:")) != -1)
+while ((c = getopt (argc, argv, "bsSctmk:")) != -1)
     switch (c)
     {
         case 'c':
@@ -144,6 +144,9 @@ while ((c = getopt (argc, argv, "bsctmk:")) != -1)
             break;
         case 'm':
             memory_resident = 1;
+            break;
+        case 'S':
+            stutter = 1;
             break;
         default:
 	    exit(1);
@@ -326,6 +329,27 @@ for (index = optind; index < argc; index++)
                         /* usleep(delay*1000); */
                         }
                     }
+                }
+                else if (stutter==1)
+                {
+                    if (rdseed == 1)
+                        //n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
+                        n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,data);
+                    else
+                        //n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
+                        n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
+                    //n = rdrand_get_n_qints_retry(BUFFERSZ, 100000, data);
+                    if (binary == 1)
+                    {
+                        fwrite(data, 1, 1024, stdout);
+                    }
+                    else    
+                    for (i=0;i<(BUFFERSZ);)
+                    {
+                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
+                        usleep(delay*1000);
+                    }
+                    usleep(5000);
                 }
                 else if (memory_resident==0)
                 {

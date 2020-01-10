@@ -19,7 +19,7 @@ webrandmeg: $(WROBJS)
 	gcc -O2 -s $(WROBJS) -lm -o webrandmeg
 
 quickrdrand: $(QKOBJS) 
-	gcc -O2 -s $(QKOBJS) -lm -o quickrdrand
+	gcc -O2 -static -s $(QKOBJS) -lm -o quickrdrand
 
 webrandmeg.o: webrandmeg.c 
 	$(CC) $(CFLAGS) -c webrandmeg.c -o webrandmeg.o
