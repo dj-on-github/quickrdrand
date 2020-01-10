@@ -214,6 +214,7 @@ for (index = optind; index < argc; index++)
 
 
     if (bflag == 1) binary = 1;
+    
     if ((got_groupsize == 1) && (binary==1)) {
         fprintf(stderr,"Error groupsize makes no sense unless in hex output mode\n");
         exit(0);
