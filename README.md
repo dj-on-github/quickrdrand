@@ -8,8 +8,18 @@ Options
   -k n  : Dump <n> KibiBytes of data
   
   -b    : Dump out in binary (default is hex)
+
+  -g n  : Group size. Data is output in time order. 
+          Lower order bits are considered first.
+          When in hex output mode (the default) this 
+          chooses what size groups to split the 64 bit rdrand number into.
+          Can be one of 8,16,32 or 64 (the default).
   
   -c    : Dump out continuously.
+  
+  -m    : Memory Resident. Malloc space to hold all the data before collecting.
+          Ensures no disc access interupts the flow of data during collection.
+          Limited by the amount of memory you can allocate.
   
 Examples:
 
@@ -94,3 +104,42 @@ fa37aa66d4a604c2 a3d3f4c7eb3f6bf1 f31d80e233aa1741 e948ba0fac777e54
 f7658bdf7a620f21 c09d8156be5d872a e66fd890cb3e0e67 15887141cf22cdd1
 13e843d4408c2813 081951dd54c122ac c80002ef8df6394c c0c22a5f901ee03c
 ```
+
+Print out as 16 bit numbers.
+
+```
+> quickrdrand -g 16
+02f5 ca13 117b f548 c399 a5c9 0e11 52c1 793f dcc4 a5c9 2cb0 0e7b 0992 2f6e e48b
+aebe b461 4978 6350 bf4c b6f6 0cce f511 a111 d06b 497d 8279 1910 ac1f 8d38 f7ad
+fd42 b252 27ea d1f4 cf9f 9f9b 97c1 0452 a78a fc51 e481 c42a 644d 9c18 e219 5c4c
+c9f4 6ff6 eb80 6931 84f2 dce0 d2af b0b0 0b7b cd0d 76e6 e868 7daa 311a 25c2 1a8e
+2946 8f31 8c2e d7be 1403 8f95 1984 c67e d0d4 5563 c272 07dd 3093 31a9 76a8 a360
+3e5f cea6 878d f415 161b bc02 0116 4616 05fc 69ba ec8a c19f b897 3e74 a45d 5710
+b8c2 41e8 e4ba a7cd 9df2 2678 2efd 5f6b d191 12e5 deae 75fb ca1c 2347 e7ef 86df
+77c1 cfca 0e3b c505 483f 3b7d 6762 88dd 451c 5ebd 9bbf 278f 333f 1fec f840 7f96
+2523 c9cc 46ca 4e33 6f1e 1220 a5c6 46ec 3194 1856 1b45 2b0f fcd2 df6d f361 3a52
+b48b 65d6 896f ffc2 3153 223d c835 da73 c095 bb04 55db 047e 29fa 0114 65c8 216a
+b59e a146 9273 a634 15ed 9e12 92cd 29a0 21a8 c46e 29dc 6a1c 1886 e930 4fc5 9714
+679e b823 928e 7ddc b496 7b10 49f4 853b befd 5621 eac6 1e11 3469 bb2f 8790 af39
+0c96 22a2 e1e0 227d 3364 666c 588b 0ed6 820b a8fa 411a 72f5 70ff c436 b734 dad5
+73ad d181 729b 2788 a782 85f6 e681 0591 df1c 9261 30c6 efb2 ab88 3a84 a857 9e8c
+68eb 781c 2fa8 95e0 96f7 caed 7ccd 5704 cafd d0fd b1a3 ca35 0441 2df2 ef8d 4c3e
+25b5 2482 cca3 97cb 78d8 6d5c c1cb 1002 8b6d f81a 5e40 2770 56ce 93ee eb84 77cb
+1d72 1539 6a90 5dfe 8648 4ccb cb93 c54d 341f df81 a8dc 78f7 0536 2208 0241 b518
+84cc aba8 3fb1 e727 4cfc 22cf 6ed8 f451 241f 2d2a 8073 2695 c658 ac65 46ec 806d
+b973 3a41 9aeb 17f1 0112 f685 4435 388f df62 50d7 1281 2a5c a245 fb67 bffd 3bdf
+8ab3 0b82 aab3 d952 1ac4 9dd6 f1aa e533 0e54 4247 abe8 ceaa 8037 9ed5 7525 f770
+53c3 dd17 697f d233 8c84 c060 a6d0 cd5d af10 ec6b 37ed cd7c d03e 0ac7 0970 0b41
+f25a 25bf 428f 7a3a b3c5 97fe 390f b2f0 fdb0 e4f4 cac3 1106 8d14 5c91 54a2 0669
+5abd 2631 3914 a8c5 c9f3 b2c6 8926 4ff4 5e29 97aa c3c8 486e 85a8 0891 dde8 e803
+2512 627e 0b08 2ea2 411f 45a1 f5f4 809d 1d17 2558 66d3 8ec0 8721 95ec cd8d 458f
+852c 54c8 5611 9b6e fa19 94ef 04be 7d30 ad2a 606c dfab 682d 638f cf9c a925 95ad
+31d6 8c3a 102c 5f09 ac88 0b47 6974 8790 7a12 d245 a1ab 9eed 6e3b 1cb6 5c7a abe0
+852c 19eb 12ed d4bf 2bb2 8f20 c4ec 2c60 c2ad 3148 fd99 d03c 7dd4 f9c5 ef93 a168
+bcef b748 a854 2619 1836 c54a c9b3 de29 6d5a 7b45 6c83 0009 6d15 0974 8a8e cf70
+3084 6abb 2f11 98d5 ae44 80e9 5605 6b81 93b7 1cdb df38 36f3 739a 8346 f060 1428
+2fb9 1e04 0362 6390 fda9 b309 e5f4 ad22 5883 81ee 05a4 84ef ea31 aca0 af84 e19a
+9795 6ba2 ea8e d869 8b9c a0fe 0452 4458 c398 5d97 616d 77fe 3158 e759 248c 797c
+c587 1658 460f 3b2b 6322 9719 43ad 89a7 9701 033c 929c 3f32 cf15 4883 0df5 8d65
+```
+

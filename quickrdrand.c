@@ -60,10 +60,68 @@ int pull64_rdseed(int thirtytwobit, uint32_t amount, uint32_t retries, uint64_t 
     }
 };
 
+void printhex(int groupsize, uint64_t *data, unsigned int i)
+{
+    uint32_t *dwordp;
+    uint16_t *wordp;
+    uint8_t  *chp;
+    int j;
+    if (groupsize == 64)
+    {
+        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
+               data[i],        data[i+1],     data[i+2],     data[i+3]);
+    }
+    else if (groupsize == 32)
+    {
+        dwordp=(uint32_t *)(&(data[i]));
+        for (j=0;j<7;j++) {
+            printf("%08" PRIx32 " ",dwordp[j]);
+        }
+        printf("%08" PRIx32 "\n",dwordp[7]); 
+    }
+    else if (groupsize == 16)
+    {
+        wordp=(uint16_t *)(&(data[i]));
+        for (j=0;j<15;j++) {
+            printf("%04" PRIx16 " ",wordp[j]);
+        }
+        printf("%04" PRIx16 "\n",wordp[15]); 
+    }
+    else if (groupsize == 8)
+    {
+        chp=(uint8_t *)(&(data[i]));
+        for (j=0;j<31;j++) {
+            printf("%02" PRIx8 " ",chp[j]);
+        }
+        printf("%02" PRIx8 "\n",chp[31]); 
+    }
+}
+
+void print_usage()
+{
+    fprintf(stderr,"Usage: quickrdand [-b][-s][-c][-h][-t][-m][-g <8|16|32|63>][-k n]\n\n");
+    fprintf(stderr,"Output random numbers using the RdRand or RdSeed instructions\n");
+    fprintf(stderr,"  Author: David Johnston, dj@deadhat.com\n\n");
+    fprintf(stderr,"  -b   : Dump out in binary (default is hex)\n");
+    fprintf(stderr,"  -s   : Use RdSeed instead of RdRand\n");
+    fprintf(stderr,"  -k n : Dump KibiBytes of data\n");
+    fprintf(stderr,"  -b   : Dump out in binary (default is hex)\n");
+    fprintf(stderr,"  -g n : Group size. Data is output in time order. Lower order\n"); 
+    fprintf(stderr,"         bits are considered first.\n");
+    fprintf(stderr,"         When in hex output mode (the default) this chooses what\n");
+    fprintf(stderr,"         size groups to split the 64 bit rdrand number into.\n");
+    fprintf(stderr,"         Can be one of 8,16,32 or 64 (the default).\n");
+    fprintf(stderr,"  -c   : Dump out continuously.\n");
+    fprintf(stderr,"  -m   : Memory Resident. Malloc space to hold all the data before\n");
+    fprintf(stderr,"         collecting. Ensures no disc access interupts the flow of\n");
+    fprintf(stderr,"         data during collection. Limited by the amount of memory you\n");
+    fprintf(stderr,"         can allocate. \n");
+}
+
 int main(int argc, char** argv, char** environ)
 {
-int n;
-int ni[5];
+uint32_t n;
+uint32_t ni[5];
 unsigned short int ji[5];
 unsigned int ki[5];
 uint64_t li[5];
@@ -81,15 +139,6 @@ unsigned char *bytedata;
 unsigned char *ptr;
 
 int abort = 0;
-//struct arg_lit *a_binary = arg_lit0("b", "binary"," Output in binary");
-//struct arg_lit *a_bugfix = arg_lit0("f", "fix"," Delete every other byte");
-//struct arg_lit *a_html = arg_lit0("w", "html"," Output with HTML headers");
-//struct arg_int *a_kilobytes = arg_int0("k", "kilobytes", "<number of KibiBytes to output>"," Number of KibiBytes to output");
-//struct arg_int *a_delay = arg_int0("d", "delay", "<ms>"," Number of millisecond delay between each output line");
-//struct arg_lit *a_continuous = arg_lit0("c", "continuous", " Output random data continuously");
-//struct arg_lit *a_help = arg_lit0("h", "help"," Print this help and exit");
-//struct arg_end *a_end = arg_end(20);
-//void *argtable[] = {a_binary, a_kilobytes, a_continuous, a_delay, a_html, a_bugfix, a_help,a_end};
 const char progname[12] = "quickrdrand";
 int exitcode = 0;
 int nerrors = 0;
@@ -99,16 +148,15 @@ int binary = 0;
 int kilobytes = 1;
 int continuous = 0;
 int delay = 0;
-int bugfix = 0;
 unsigned char *cgifile;
 unsigned char *cgimegabytes;
 int megabytes;
 int f;
-unsigned char filename[255];
-unsigned char shortfilename[255];
+char filename[255];
+char shortfilename[255];
 int content_length;
-unsigned char *content_length_ptr;
-unsigned char post_buffer[10000];
+char *content_length_ptr;
+char post_buffer[10000];
 int docgi;
 mode_t oldmask;
 
@@ -119,11 +167,13 @@ char *kvalue = NULL;
 int c;
 int index;
 int rdseed = 0;
+int groupsize = 64;
+int got_groupsize = 0;
 int thirtytwobit = 0;
 int memory_resident = 0;
 int stutter=0;
 
-while ((c = getopt (argc, argv, "bsSctmk:")) != -1)
+while ((c = getopt (argc, argv, "bsSchtmg:k:")) != -1)
     switch (c)
     {
         case 'c':
@@ -139,6 +189,11 @@ while ((c = getopt (argc, argv, "bsSctmk:")) != -1)
             kvalue = optarg;
             kilobytes = atoi(kvalue);
             break;
+        case 'g':
+            kvalue = optarg;
+            groupsize = atoi(kvalue);
+            got_groupsize = 1;
+            break;
         case 't':
             thirtytwobit = 1;
             break;
@@ -148,18 +203,32 @@ while ((c = getopt (argc, argv, "bsSctmk:")) != -1)
         case 'S':
             stutter = 1;
             break;
+        case 'h':
         default:
-	    exit(1);
+            print_usage();
+            exit(1);
     }
-    
-//printf ("bflag = %d, kvalue = %s, kilobytes=%d\n",bflag, kvalue, kilobytes);
-            
+                
 for (index = optind; index < argc; index++)
     printf ("Non-option argument %s\n", argv[index]);
 
 
-        if (bflag == 1) binary = 1;
-
+    if (bflag == 1) binary = 1;
+    if ((got_groupsize == 1) && (binary==1)) {
+        fprintf(stderr,"Error groupsize makes no sense unless in hex output mode\n");
+        exit(0);
+    }
+    
+    if (groupsize != 1) {
+        if ( !  ((groupsize == 8)
+                ||(groupsize == 16)
+                ||(groupsize == 32)
+                ||(groupsize == 64))) {
+                fprintf(stderr,"Error, groupsize (-g <n>) must be one of 8,16,32 or 64 bits");
+                exit(0);
+            }
+    }
+    
     docgi = 0;
     if (strstr(argv[0],"quickrdrand.cgi")!=NULL) docgi = 1;
 
@@ -170,7 +239,7 @@ for (index = optind; index < argc; index++)
         if (DEBUG > 1) printf("argv[0]:%s\n",argv[0]);
 
         i = 0;
-        ptr = environ[i];
+        ptr = (unsigned char *)environ[i];
         while (ptr != NULL)
         {
             if (DEBUG > 1) printf("%s\n",environ[i]);
@@ -181,7 +250,7 @@ for (index = optind; index < argc; index++)
                 if (DEBUG > 1) printf("FOUND CONTENT_LENGTH = %d\n",content_length);
             }
             i++;
-            ptr = environ[i];
+            ptr = (unsigned char *)environ[i];
         }
 
         binary = 1;
@@ -200,17 +269,15 @@ for (index = optind; index < argc; index++)
     if ( ((rdrand_check_support()==1) && (rdseed==0)) || ((rdseed_check_support()==1) && (rdseed==1))) {
         i = 0;
         j = 0;
-        if ((docgi == 1))
+        if (docgi == 1)
         {
             if (megabytes == 0) megabytes = 1;
 
             if (DEBUG > 1) printf("<p>megabytes %d</p>",megabytes);
             if (megabytes > MAX_MEGABYTES) megabytes = MAX_MEGABYTES;
             rdrand32_step(&n);
-            sprintf(filename,"/var/www/html/webrandfiles/rand_%d.bin",(unsigned int)abs(n));
-            //sprintf(shortfilename,"http://134.134.159.83/randfiles/rand_%d.bin",(unsigned int)abs(n));
-            sprintf(shortfilename,"http://davidsdesktop.com/webrandfiles/rand_%d.bin",(unsigned int)abs(n));
-            //f = open(filename, (O_WRONLY | O_CREAT | S_IROTH | S_IWOTH | S_IRUSR | S_IWUSR ));
+            sprintf(filename,"/var/www/html/webrandfiles/rand_%d.bin",(unsigned int)n);
+            sprintf(shortfilename,"http://davidsdesktop.com/webrandfiles/rand_%d.bin",(unsigned int)n);
             f = open(filename, (O_WRONLY | O_CREAT ));
             if (DEBUG > 1) printf("<p>open %s for writing = %d</p>\n",filename, f);
             if (f != -1)
@@ -218,23 +285,10 @@ for (index = optind; index < argc; index++)
                 for (i=0;i<megabytes;i++)
                 {
                     if (DEBUG > 1) printf("<p>Getting megabyte #%d</p>\n",i);
-                    if (bugfix == 1)
-                    {
-                        //n = rdrand_get_n_uint64_retry(131072,30,megabuff);
-                        n = pull64_rdrand(thirtytwobit, 131072,30,megabuff);
-                        fixbuff(megabuff);
-                        n = write(f,megabuff,(512*1024));
-                        //n = rdrand_get_n_uint64_retry(131072,30,megabuff);
-                        n = pull64_rdrand(thirtytwobit, 131072,30,megabuff);
-                        fixbuff(megabuff);
-                        n = write(f,megabuff,(512*1024));
-                    }
-                    else
-                    {   
-                        //n = rdrand_get_n_uint64_retry(131072,30,megabuff);
-                        n = pull64_rdrand(thirtytwobit, 131072,30,megabuff);
-                        n = write(f,megabuff,(1024*1024));
-                    }
+
+                    n = pull64_rdrand(thirtytwobit, 131072,30,megabuff);
+                    n = write(f,megabuff,(1024*1024));
+                    
                     if (DEBUG > 1) printf("<p>write returned #%d</p>\n",n);
                 }
                 close(f);
@@ -244,9 +298,9 @@ for (index = optind; index < argc; index++)
                 printf("<input type=\"text\" value=\"1\" maxlen=\"3\" name=\"DRNG_MEGABYTES\" >\n");
                 printf("<input type=\"SUBMIT\">\n");
                 
-		if ((megabytes < 1) || (megabytes > 16)) {
-			megabytes = 1;
-		}
+        if ((megabytes < 1) || (megabytes > 16)) {
+            megabytes = 1;
+        }
 
                 if (megabytes ==1 ) printf("<p><a href=\"%s\">1 Megabyte of random data. Download Me.</a></p>\n",shortfilename);
                 else printf("<p><a href=\"%s\">%d Megabytes of random data. Download Me.</a></p>\n",shortfilename,megabytes);
@@ -261,76 +315,31 @@ for (index = optind; index < argc; index++)
         {
             while(1)
             {   
-                /*printf("RDRAND rdrand_get_n_uints_retry(1024, 10 data) test\n");*/
-                if (bugfix==1)
-                {
-                    if (rdseed == 1)
-                        n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,megabuff);
-                    else
-                        n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
-                    fixsmallbuff(data);
-
-                    if (binary == 1)
-                    {
-                        fwrite(data, 1, 1024, stdout);
-                    }
-                    else    
-                    for (i=0;i<(BUFFERSZ);)
-                    {
-                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
-                        usleep(delay*1000);
-                    }
-                }
+                
+                if (rdseed == 1)
+                    n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,data);
                 else
+                    n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
+                
+                if (binary == 1)
                 {
-                    if (rdseed == 1)
-                        n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,data);
-                    else
-                        n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
-                    //n = rdrand_get_n_qints_retry(BUFFERSZ, 10, data);
-                    if (binary == 1)
-                    {
-                        fwrite(data, 1, 1024, stdout);
-                    }
-                    else    
-                    for (i=0;i<(BUFFERSZ);)
-                    {
-                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
-                        usleep(delay*1000);
-                    }
+                    fwrite(data, 1, 1024, stdout);
                 }
+                else    
+                for (i=0;i<(BUFFERSZ);)
+                {
+                    printhex(groupsize,data,i);
+                    i+=4;
+                    usleep(delay*1000);
+                }
+                
             }
         }
         else
         {
             for (j=0; j<kilobytes; j++)
             {
-                if (bugfix == 1)
-                {
-                    if (rdseed == 1)
-                        //n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
-                        n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,data);
-                    else
-                        //n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
-                        n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
-                    //n = rdrand_get_n_qints_retry(2*BUFFERSZ, 1000, data);
-                    fixsmallbuff(data);
-                    if (binary == 1)
-                    {
-                        fwrite(data, 1, 1024, stdout);
-                    }
-                    else    
-                    {
-                        /* printf("Collected %d qints\n",2*BUFFERSZ); */
-                        for (i=0;i<(BUFFERSZ);)
-                        {
-                        /* printf("i=%d\n",i);*/
-                            printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
-                        /* usleep(delay*1000); */
-                        }
-                    }
-                }
-                else if (stutter==1)
+                if (stutter==1)
                 {
                     if (rdseed == 1)
                         //n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
@@ -354,12 +363,9 @@ for (index = optind; index < argc; index++)
                 else if (memory_resident==0)
                 {
                     if (rdseed == 1)
-                        //n = rdseed_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
                         n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,data);
                     else
-                        //n = rdrand_get_n_uint64_retry(2*BUFFERSZ, 1000, data);
                         n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
-                    //n = rdrand_get_n_qints_retry(BUFFERSZ, 100000, data);
                     if (binary == 1)
                     {
                         fwrite(data, 1, 1024, stdout);
@@ -367,14 +373,13 @@ for (index = optind; index < argc; index++)
                     else    
                     for (i=0;i<(BUFFERSZ);)
                     {
-                        printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",data[i++], data[i++], data[i++], data[i++]);
+                        printhex(groupsize,data,i);
+                        i += 4;
                         usleep(delay*1000);
                     }
                 }
                 else // memory resident version
                 {
-                    //printf("A\n"); fflush(stdout);
-
                     bigbuff = (unsigned char *)malloc((kilobytes*1024)+1);
                     if (bigbuff==NULL){
                         printf("Could not allocate %d bytes in memory\n",(kilobytes*1024));
@@ -382,14 +387,11 @@ for (index = optind; index < argc; index++)
                     }
                     bigbuff64=(uint64_t *)bigbuff;
 
-                    //printf("B\n"); fflush(stdout);
                     if (rdseed == 1)
                         n = pull64_rdseed(thirtytwobit, (kilobytes*128),10000,bigbuff64);
                     else
                         n = pull64_rdrand(thirtytwobit, (kilobytes*128),10,bigbuff64);
-                    //n = rdrand_get_n_qints_retry(BUFFERSZ, 100000, data);
                     j = j+kilobytes;
-                    //printf("C\n"); fflush(stdout);
                     if (binary == 1)
                     {
                         fwrite(bigbuff, 1, (kilobytes*1024), stdout);
@@ -397,12 +399,11 @@ for (index = optind; index < argc; index++)
                     else  {  
                         for (i=0;i<((kilobytes*1024)/8);)
                         {
-                            printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",bigbuff64[i], bigbuff64[i+1], bigbuff64[i+2], bigbuff64[i+3]);
+                            printhex(groupsize,data,i);
                             i+=4;
                             usleep(delay*1000);
                         }
                     }
-                    //printf("D\n"); fflush(stdout);
                     
                     free(bigbuff);
                     
@@ -420,7 +421,6 @@ for (index = optind; index < argc; index++)
         printf("</pre></body></html>\n");
     }
     exit:
-    //arg_freetable(argtable, sizeof(argtable)/sizeof(argtable[0]));
     return exitcode;
 }
 
