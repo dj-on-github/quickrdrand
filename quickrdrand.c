@@ -170,7 +170,7 @@ int rdseed = 0;
 int groupsize = 64;
 int thirtytwobit = 0;
 int memory_resident = 0;
-
+int got_groupsize = 0;
 
 while ((c = getopt (argc, argv, "bschtmg:k:")) != -1)
     switch (c)
@@ -191,6 +191,7 @@ while ((c = getopt (argc, argv, "bschtmg:k:")) != -1)
         case 'g':
             kvalue = optarg;
             groupsize = atoi(kvalue);
+            got_groupsize=1;
             break;
         case 't':
             thirtytwobit = 1;
@@ -209,7 +210,8 @@ for (index = optind; index < argc; index++)
 
 
     if (bflag == 1) binary = 1;
-    if ((groupsize != 1) && (binary==1)) {
+    
+    if ((got_groupsize == 1) && (binary==1)) {
         fprintf(stderr,"Error groupsize makes no sense unless in hex output mode\n");
         exit(0);
     }
