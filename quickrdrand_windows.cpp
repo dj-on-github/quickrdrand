@@ -333,7 +333,8 @@ int main(int argc, char** argv)
 					else
 						for (i = 0;i<(BUFFERSZ);)
 						{
-							printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n", data[i++], data[i++], data[i++], data[i++]);
+							printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n", data[i], data[i+1], data[i+2], data[i+3]);
+							i += 4;
 							//usleep(delay * 1000);
 						}
 				}
@@ -351,7 +352,8 @@ int main(int argc, char** argv)
 					else
 						for (i = 0;i<(BUFFERSZ);)
 						{
-							printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n", data[i++], data[i++], data[i++], data[i++]);
+							printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n", data[i], data[i+1], data[i+2], data[i+3]);
+							i += 4;
 							//usleep(delay * 1000);
 						}
 				}
@@ -381,7 +383,8 @@ int main(int argc, char** argv)
 						for (i = 0;i<(BUFFERSZ);)
 						{
 							/* printf("i=%d\n",i);*/
-							printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n", data[i++], data[i++], data[i++], data[i++]);
+							printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n", data[i], data[i+1], data[i+2], data[i+3]);
+							i += 4;
 							/* usleep(delay*1000); */
 						}
 					}
@@ -402,7 +405,8 @@ int main(int argc, char** argv)
 					else
 						for (i = 0;i<(BUFFERSZ);)
 						{
-							printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n", data[i++], data[i++], data[i++], data[i++]);
+							printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n", data[i], data[i+1], data[i+2], data[i+3]);
+							i += 4;
 							//usleep(delay * 1000);
 						}
 					if (stutter == 1) Sleep(10);
