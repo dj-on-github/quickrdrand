@@ -104,6 +104,8 @@ void print_usage()
     fprintf(stderr,"  Author: David Johnston, dj@deadhat.com\n\n");
     fprintf(stderr,"  -b   : Dump out in binary (default is hex)\n");
     fprintf(stderr,"  -s   : Use RdSeed instead of RdRand\n");
+    fprintf(stderr,"  -S   : Stutter mode - Insert 5ms delay after pulling each 1Kibyte of data\n");
+    fprintf(stderr,"  -t   : Tbirty Two bit mode - Uses 32 bit reads instead of 64\n");
     fprintf(stderr,"  -k n : Dump KibiBytes of data\n");
     fprintf(stderr,"  -b   : Dump out in binary (default is hex)\n");
     fprintf(stderr,"  -g n : Group size. Data is output in time order. Lower order\n"); 
