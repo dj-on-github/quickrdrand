@@ -369,7 +369,7 @@ for (index = optind; index < argc; index++)
                     if (rdseed == 1)
                         n = pull64_rdseed(thirtytwobit, 2*BUFFERSZ,10000,data);
                     else
-                        n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10,data);
+                        n = pull64_rdrand(thirtytwobit, 2*BUFFERSZ,10000,data);
                     if (binary == 1)
                     {
                         fwrite(data, 1, 1024, stdout);
@@ -394,7 +394,7 @@ for (index = optind; index < argc; index++)
                     if (rdseed == 1)
                         n = pull64_rdseed(thirtytwobit, (kilobytes*128),10000,bigbuff64);
                     else
-                        n = pull64_rdrand(thirtytwobit, (kilobytes*128),10,bigbuff64);
+                        n = pull64_rdrand(thirtytwobit, (kilobytes*128),10000,bigbuff64);
                     j = j+kilobytes;
                     if (binary == 1)
                     {
