@@ -66,7 +66,17 @@ void printhex(int groupsize, uint64_t *data, unsigned int i)
     uint16_t *wordp;
     uint8_t  *chp;
     int j;
-    if (groupsize == 64)
+    if (groupsize == 256)
+    {
+        printf("%016" PRIx64 "%016" PRIx64 "%016" PRIx64 "%016" PRIx64 "\n",
+               data[i],        data[i+1],     data[i+2],     data[i+3]);
+    }
+    else if (groupsize == 128)
+    {
+        printf("%016" PRIx64 "%016" PRIx64 " %016" PRIx64 "%016" PRIx64 "\n",
+               data[i],        data[i+1],     data[i+2],     data[i+3]);
+    }
+    else if (groupsize == 64)
     {
         printf("%016" PRIx64 " %016" PRIx64 " %016" PRIx64 " %016" PRIx64 "\n",
                data[i],        data[i+1],     data[i+2],     data[i+3]);
@@ -226,8 +236,10 @@ for (index = optind; index < argc; index++)
         if ( !  ((groupsize == 8)
                 ||(groupsize == 16)
                 ||(groupsize == 32)
-                ||(groupsize == 64))) {
-                fprintf(stderr,"Error, groupsize (-g <n>) must be one of 8,16,32 or 64 bits");
+                ||(groupsize == 64) 
+                ||(groupsize == 128) 
+                ||(groupsize == 256))) {
+                fprintf(stderr,"Error, groupsize (-g <n>) must be one of 8,16,32,64,128 or 256 bits");
                 exit(0);
             }
     }

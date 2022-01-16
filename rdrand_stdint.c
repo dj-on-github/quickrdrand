@@ -19,7 +19,6 @@ uint32_t c;
 uint32_t d;
 
 asm("\n\
-    xor %%ecx, %%ecx\n\
     mov %4, %%eax\n\
     cpuid\n\
     mov %%eax,%0\n\
@@ -122,6 +121,7 @@ int check_rdrand() {
     CPUIDinfo info;
    
     get_cpuid(&info,1,0);
+   
     if ((info.ECX & 0x40000000)==0x40000000) return 1;
     return 0;
 }
@@ -173,6 +173,13 @@ return cf_error_status;
 
 }
 
+/***************************************************/
+/* Gathers 16 bits of entropy through RDSEED       */
+/*   The 16 bit result is zero extended to 32 bits */
+/*   Writes that entropy to *therand.              */
+/*   Returns 1 on success, or 0 on underflow      */
+/***************************************************/
+
 int rdseed16_step(uint16_t *therand)
 {
 uint16_t foo;
@@ -207,6 +214,12 @@ asm("\n\
 return cf_error_status;
 
 }
+
+/**********************************************/
+/* Gathers 32 bits of entropy through RDSEED  */
+/*   Writes that entropy to *therand.         */
+/*   Returns 1 on success, or 0 on undeerflow */
+/**********************************************/
 
 int rdseed32_step(uint32_t *therand)
 {
@@ -243,6 +256,12 @@ asm("\n\
 return cf_error_status;
 }
 
+/**********************************************/
+/* Gathers 64 bits of entropy through RDSEED  */
+/*   Writes that entropy to *therand.         */
+/*   Returns 1 on success, or 0 on underflow  */
+/**********************************************/
+
 int rdseed64_step(uint64_t *therand)
 {
 uint64_t foo;
@@ -275,6 +294,13 @@ int rdrand_get_uint32(uint32_t *dest)
 	else return 0;
 }
 
+/**************************************************/
+/* Uses RdSeed to acquire a 32 bit random number  */
+/*   Writes that entropy to (uint32_t *)dest. */
+/*   Will not attempt retry on underflow          */
+/*   Returns 1 on success, or 0 on underflow      */
+/**************************************************/
+
 int rdseed_get_uint32(uint32_t *dest)
 {
 	uint32_t therand;
@@ -286,6 +312,13 @@ int rdseed_get_uint32(uint32_t *dest)
 	else return 0;
 }
 
+/**************************************************/
+/* Uses RdRand to acquire a 64 bit random number  */
+/*   Writes that entropy to (uint64_t *)dest. */
+/*   Will not attempt retry on underflow          */
+/*   Returns 1 on success, or 0 on underflow      */
+/**************************************************/
+
 int rdrand_get_uint64(uint64_t *dest)
 {
 	uint64_t therand;
@@ -296,6 +329,13 @@ int rdrand_get_uint64(uint64_t *dest)
 	}
 	else return 0;
 }
+
+/**************************************************/
+/* Uses RdSeed to acquire a 64 bit random number  */
+/*   Writes that entropy to (uint64_t *)dest. */
+/*   Will not attempt retry on underflow          */
+/*   Returns 1 on success, or 0 on underflow      */
+/**************************************************/
 
 int rdseed_get_uint64(uint64_t *dest)
 {
@@ -326,7 +366,7 @@ uint32_t therand;
   do
   {
 	success=rdrand32_step(&therand);
-  } while((success == 0) || (count++ < retry_limit));
+  } while((success == 0) && (count++ < retry_limit));
   
   if (success == 1)
   {
@@ -338,6 +378,13 @@ uint32_t therand;
 	return 0;
   }
 }
+
+/**************************************************/
+/* Uses RdRand to acquire a 64 bit random number  */
+/*   Writes that entropy to (uint64_t *)dest. */
+/*   Will retry up to retry_limit times           */
+/*   Returns 1 on success, or 0 on underflow      */
+/**************************************************/
 
 int rdrand_get_uint64_retry(uint32_t retry_limit, uint64_t *dest)
 {
@@ -350,7 +397,7 @@ uint64_t therand;
   do
   {
 	success=rdrand64_step(&therand);
-  } while((success == 0) || (count++ < retry_limit));
+  } while((success == 0) && (count++ < retry_limit));
   
   if (success == 1)
   {
@@ -362,6 +409,13 @@ uint64_t therand;
 	return 0;
   }
 }
+
+/**************************************************/
+/* Uses RdSeed to acquire a 32 bit random number  */
+/*   Writes that entropy to (uint32_t *)dest. */
+/*   Will retry up to retry_limit times           */
+/*   Returns 1 on success, or 0 on underflow      */
+/**************************************************/
 
 int rdseed_get_uint32_retry(uint32_t retry_limit, uint32_t *dest)
 {
@@ -374,7 +428,7 @@ uint32_t therand;
   do
   {
 	success=rdseed32_step(&therand);
-  } while((success == 0) || (count++ < retry_limit));
+  } while((success == 0) && (count++ < retry_limit));
   
   if (success == 1)
   {
@@ -386,6 +440,13 @@ uint32_t therand;
 	return 0;
   }
 }
+
+/**************************************************/
+/* Uses RdSeed to acquire a 64 bit random number  */
+/*   Writes that entropy to (uint64_t *)dest. */
+/*   Will retry up to retry_limit times           */
+/*   Returns 1 on success, or 0 on underflow      */
+/**************************************************/
 
 int rdseed_get_uint64_retry(uint32_t retry_limit, uint64_t *dest)
 {
@@ -398,7 +459,7 @@ uint64_t therand;
   do
   {
 	success=rdseed64_step(&therand);
-  } while((success == 0) || (count++ < retry_limit));
+  } while((success == 0) && (count++ < retry_limit));
   
   if (success == 1)
   {
@@ -411,10 +472,61 @@ uint64_t therand;
   }
 }
 
+/****************************************************************/
+/* Uses RdRand to acquire a block of n 16 bit random numbers    */
+/*   Writes that entropy to (unsigned short *)dest[0+]. */
+/*   Will retry up to retry_limit times                         */
+/*   Returns 1 on success, or 0 on underflow                    */
+/****************************************************************/
+
+int rdrand_get_n_uint16_retry(uint32_t n, uint32_t retry_limit, uint16_t *dest)
+{
+int success=0;
+int count=0;
+int i=0;
+
+    for (i=0; i<n; i++)
+    {
+        count = 0;
+        do
+        {
+                success=rdrand16_step(dest);
+        } while((success == 0) && (count++ < retry_limit));
+        if (success == 0) return 0;
+        dest=&(dest[1]);
+    }
+    return 1; 
+}
+
+/****************************************************************/
+/* Uses RdSeed to acquire a block of n 16 bit random numbers    */
+/*   Writes that entropy to (unsigned short *)dest[0+]. */
+/*   Will retry up to retry_limit times                         */
+/*   Returns 1 on success, or 0 on underflow                    */
+/****************************************************************/
+
+int rdseed_get_n_uint16_retry(uint32_t n, uint32_t retry_limit, uint16_t *dest)
+{
+int success=0;
+int count=0;
+int i=0;
+
+    for (i=0; i<n; i++)
+    {
+        count = 0;
+        do
+        {
+                success=rdseed16_step(dest);
+        } while((success == 0) && (count++ < retry_limit));
+        if (success == 0) return 0;
+        dest=&(dest[1]);
+    }
+    return 1; 
+}
 
 /****************************************************************/
 /* Uses RdRand to acquire a block of n 32 bit random numbers    */
-/*   Writes that entropy to (unsigned long long int *)dest[0+]. */
+/*   Writes that entropy to (unsigned int *)dest[0+]. */
 /*   Will retry up to retry_limit times                         */
 /*   Returns 1 on success, or 0 on underflow                    */
 /****************************************************************/
@@ -425,18 +537,25 @@ int success=0;
 int count=0;
 int i=0;
 
-	for (i=0; i<n; i++)
-	{
-		count = 0;
-		do
-		{
-        		success=rdrand32_step(dest);
-		} while((success == 0) && (count++ < retry_limit));
-		if (success == 0) return 0;
-		dest=&(dest[1]);
-	}
-	return 1; 
+    for (i=0; i<n; i++)
+    {
+        count = 0;
+        do
+        {
+                success=rdrand32_step(dest);
+        } while((success == 0) && (count++ < retry_limit));
+        if (success == 0) return 0;
+        dest=&(dest[1]);
+    }
+    return 1; 
 }
+
+/****************************************************************/
+/* Uses RdSeed to acquire a block of n 32 bit random numbers    */
+/*   Writes that entropy to (unsigned int *)dest[0+]. */
+/*   Will retry up to retry_limit times                         */
+/*   Returns 1 on success, or 0 on underflow                    */
+/****************************************************************/
 
 int rdseed_get_n_uint32_retry(uint32_t n, uint32_t retry_limit, uint32_t *dest)
 {
@@ -444,21 +563,21 @@ int success=0;
 int count=0;
 int i=0;
 
-	for (i=0; i<n; i++)
-	{
-		count = 0;
-		do
-		{
-        		success=rdseed32_step(dest);
-		} while((success == 0) && (count++ < retry_limit));
-		if (success == 0) return 0;
-		dest=&(dest[1]);
-	}
-	return 1; 
+    for (i=0; i<n; i++)
+    {
+        count = 0;
+        do
+        {
+                success=rdseed32_step(dest);
+        } while((success == 0) && (count++ < retry_limit));
+        if (success == 0) return 0;
+        dest=&(dest[1]);
+    }
+    return 1; 
 }
 /****************************************************************/
 /* Uses RdRand to acquire a block of n 64 bit random numbers    */
-/*   Writes that entropy to (unsigned long long int *)dest[0+]. */
+/*   Writes that entropy to (unsigned long long *)dest[0+]. */
 /*   Will retry up to retry_limit times                         */
 /*   Returns 1 on success, or 0 on underflow                    */
 /****************************************************************/
@@ -469,18 +588,25 @@ int success=0;
 int count=0;
 int i=0;
 
-	for (i=0; i<n; i++)
-	{
-		count = 0;
-		do
-		{
-        		success=rdrand64_step(dest);
-		} while((success == 0) && (count++ < retry_limit));
-		if (success == 0) return 0;
-		dest=&(dest[1]);
-	}
-	return 1; 
+    for (i=0; i<n; i++)
+    {
+        count = 0;
+        do
+        {
+                success=rdrand64_step(dest);
+        } while((success == 0) && (count++ < retry_limit));
+        if (success == 0) return 0;
+        dest=&(dest[1]);
+    }
+    return 1; 
 }
+
+/****************************************************************/
+/* Uses RdSeed to acquire a block of n 64 bit random numbers    */
+/*   Writes that entropy to (unsigned long long *)dest[0+]. */
+/*   Will retry up to retry_limit times                         */
+/*   Returns 1 on success, or 0 on underflow                    */
+/****************************************************************/
 
 int rdseed_get_n_uint64_retry(uint32_t n, uint32_t retry_limit, uint64_t *dest)
 {
@@ -488,16 +614,15 @@ int success;
 int count;
 unsigned int i;
 
-	for (i=0; i<n; i++)
-	{
-		count = 0;
-		do
-		{
-        		success=rdseed64_step(dest);
-		} while((success == 0) && (count++ < retry_limit));
-		if (success == 0) return 0;
-		dest=&(dest[1]);
-	}
-	return 1; 
+    for (i=0; i<n; i++)
+    {
+        count = 0;
+        do
+        {
+                success=rdseed64_step(dest);
+        } while((success == 0) && (count++ < retry_limit));
+        if (success == 0) return 0;
+        dest=&(dest[1]);
+    }
+    return 1; 
 }
-
